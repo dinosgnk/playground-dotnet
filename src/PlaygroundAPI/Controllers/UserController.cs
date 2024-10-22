@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using PlaygroundAPI.Data;
 
 namespace PlaygroundAPI.Controllers;
 
@@ -6,9 +7,16 @@ namespace PlaygroundAPI.Controllers;
 [Route("[controller]")]
 public class UserController : ControllerBase
 {
-    public UserController()
+    private readonly DataContextDapper _dapper;
+    public UserController(IConfiguration config)
     {
+        _dapper = new DataContextDapper(config);
+    }
 
+    [HttpGet("TestConnection")]
+    public DateTime TestConnection()
+    {
+        return _dapper.LoadDataSingle<DateTime>("SELECT CURRENT_DATE");
     }
 
     [HttpGet("GetUsers/{testValue}")]
