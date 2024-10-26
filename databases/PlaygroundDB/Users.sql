@@ -1,4 +1,4 @@
-CREATE SCHEMA IF NOT EXISTS UsersSchema;
+CREATE SCHEMA UsersSchema;
 
 DROP TABLE IF EXISTS UsersSchema.Users;
 

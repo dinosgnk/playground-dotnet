@@ -52,7 +52,8 @@ public class UserController : ControllerBase
                 StreetAddress
             FROM
                 UsersSchema.Users
-            WHERE UserId = " + userId.ToString();
+            WHERE
+                UserId = " + userId.ToString();
 
         User user = _dapper.LoadDataSingle<User>(sql);
         Console.WriteLine(user);

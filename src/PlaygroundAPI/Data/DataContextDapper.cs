@@ -5,7 +5,7 @@ using Npgsql;
 namespace PlaygroundAPI.Data
 {
     class DataContextDapper
-    {  
+    {
         private readonly IConfiguration _config;
         public DataContextDapper(IConfiguration config)
         {
@@ -22,6 +22,6 @@ namespace PlaygroundAPI.Data
         {
             IDbConnection dbConnection = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             return dbConnection.QuerySingle<T>(sqlQuery);
-        }   
+        }
     }
 }
