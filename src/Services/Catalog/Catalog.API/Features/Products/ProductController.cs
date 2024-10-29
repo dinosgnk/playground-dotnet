@@ -1,4 +1,3 @@
-using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
 using Catalog.API.Data;
