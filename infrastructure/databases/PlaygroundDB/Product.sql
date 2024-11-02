@@ -7,7 +7,7 @@ CREATE TABLE products.Product (
 	Name VARCHAR(50),
 	Category VARCHAR(50),
 	Description TEXT,
-	Price DECIMAL(5,2)
+	Price DECIMAL(12,2)
 );
 
 INSERT INTO products.Product (Name, Category, Description, Price) VALUES ('Product #1 Name', 'Grocery', 'Vestibulum quam sapien, varius ut, blandit non, interdum in, ante. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Duis faucibus accumsan odio. Curabitur convallis.', 281.92);

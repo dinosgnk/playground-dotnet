@@ -15,11 +15,11 @@ services:
     networks:
       - dev-net
 
-  postgres-exporter:
+  postgres_exporter:
     depends_on:
       - postgres
     image: quay.io/prometheuscommunity/postgres-exporter
-    container_name: postgres-exporter
+    container_name: postgres_exporter
     environment:
       DATA_SOURCE_URI: "postgres:5432/postgres?sslmode=disable"
       DATA_SOURCE_USER: devuser
@@ -48,6 +48,35 @@ services:
       - "3000:3000"
     volumes:
       - ./monitoring/grafana/data:/var/lib/grafana
+    networks:
+      - dev-net
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    networks:
+      - dev-net
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
     networks:
       - dev-net
 
