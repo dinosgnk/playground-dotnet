@@ -1,6 +1,8 @@
+using System.Text.Json;
 using Catalog.API.Models;
 using Dapper;
 using Npgsql;
+using StackExchange.Redis;
 
 namespace Catalog.API.Data;
 
@@ -8,12 +10,14 @@ public class ProductRepositoryDapper : IProductRepostiory
 {
     private readonly IConfiguration _config;
     private readonly NpgsqlConnection _connection;
+    private readonly IConnectionMultiplexer _connectionMultiplexer;
 
-    public ProductRepositoryDapper(IConfiguration config)
+    public ProductRepositoryDapper(IConfiguration config, IConnectionMultiplexer connectionMultiplexer)
     {
         Console.WriteLine("ProductRepositoryDapper created");
         _config = config;
-        _connection = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+        _connectionMultiplexer = connectionMultiplexer;
+        _connection = new NpgsqlConnection(_config.GetConnectionString("PlaygroundDB"));
     }
 
     public IEnumerable<Product> GetProducts()
@@ -56,6 +60,16 @@ public class ProductRepositoryDapper : IProductRepostiory
 
     public IEnumerable<Product> GetProductsByCategory(string category)
     {
+        string cacheKey = category;
+        var db = _connectionMultiplexer.GetDatabase();
+        var cachedCategoryRedisValue = db.StringGet(cacheKey);
+
+        if (cachedCategoryRedisValue.HasValue)
+        {
+            Console.WriteLine($"Got {category} category from Redis");
+            return JsonSerializer.Deserialize<IEnumerable<Product>>(cachedCategoryRedisValue);
+        }
+
         string sql = @"
             SELECT
                 ProductId,
@@ -74,7 +88,11 @@ public class ProductRepositoryDapper : IProductRepostiory
         };
         var parameters = new DynamicParameters(paramDictionary);
 
-        return _connection.Query<Product>(sql, parameters);
+        var products = _connection.Query<Product>(sql, parameters);
+
+        var serializedProducts = JsonSerializer.Serialize(products);
+        db.StringSet(cacheKey, serializedProducts);
+        return products;
     }
 
     public bool CreateProduct(Product product)

@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 
 using Catalog.API.Data;
 using Catalog.API.Models;
+using Microsoft.AspNetCore.Connections;
+using StackExchange.Redis;
 
 namespace Catalog.API.Features.Products;
 
@@ -10,10 +12,10 @@ namespace Catalog.API.Features.Products;
 public class ProductController : ControllerBase
 {
     private readonly IProductRepostiory _repository;
-    public ProductController(IConfiguration config)
+    public ProductController(IConfiguration config, IConnectionMultiplexer connectionMultiplexer)
     {
         Console.WriteLine("ProductController created");
-        _repository = new ProductRepositoryDapper(config);
+        _repository = new ProductRepositoryDapper(config, connectionMultiplexer);
     }
 
     [HttpGet("")]

@@ -1,3 +1,4 @@
+using StackExchange.Redis;
 internal class Program
 {
     private static void Main(string[] args)
@@ -6,7 +7,13 @@ internal class Program
 
         builder.Services.AddControllers();
 
-        // Add services to the container.
+        /// Add services to the container.
+        builder.Services.AddSingleton<IConnectionMultiplexer>(sp => 
+        {
+            var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
+            return ConnectionMultiplexer.Connect(redisConnectionString);
+        });
+
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
