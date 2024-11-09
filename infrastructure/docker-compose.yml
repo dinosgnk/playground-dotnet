@@ -1,6 +1,21 @@
 version: '3.8'
 
 services:
+
+  catalog:
+    image: catalog
+    build:
+      context: ../
+      dockerfile: src/Services/Catalog/Catalog.API/Dockerfile
+    container_name: catalog
+    ports:
+      - 5000:5000
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://*:5000
+    networks:
+      - dev-net
+
   postgres:
     image: postgres:15
     container_name: postgres
