@@ -1,12 +1,19 @@
 using StackExchange.Redis;
+using Serilog;
 internal class Program
 {
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddControllers();
+        // Configure Logging
+        builder.Host.UseSerilog((context, loggerConfig) => 
+        {
+            loggerConfig.WriteTo.Console();
+        });
 
+        builder.Services.AddControllers();
+        
         /// Add services to the container.
         builder.Services.AddSingleton<IConnectionMultiplexer>(sp => 
         {

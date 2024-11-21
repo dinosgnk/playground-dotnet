@@ -11,13 +11,16 @@ public class ProductRepositoryDapper : IProductRepostiory
     private readonly IConfiguration _config;
     private readonly NpgsqlConnection _connection;
     private readonly IConnectionMultiplexer _connectionMultiplexer;
+    private readonly ILogger<ProductRepositoryDapper> _logger;
 
-    public ProductRepositoryDapper(IConfiguration config, IConnectionMultiplexer connectionMultiplexer)
+    public ProductRepositoryDapper(IConfiguration config, IConnectionMultiplexer connectionMultiplexer, ILogger<ProductRepositoryDapper> logger)
     {
-        Console.WriteLine("ProductRepositoryDapper created");
         _config = config;
         _connectionMultiplexer = connectionMultiplexer;
         _connection = new NpgsqlConnection(_config.GetConnectionString("PlaygroundDB"));
+        _logger = logger;
+
+        _logger.LogInformation("ProductRepositoryDapper created");
     }
 
     public IEnumerable<Product> GetProducts()

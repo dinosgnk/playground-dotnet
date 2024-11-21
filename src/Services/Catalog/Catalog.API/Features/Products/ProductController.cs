@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 
 using Catalog.API.Data;
 using Catalog.API.Models;
-using Microsoft.AspNetCore.Connections;
 using StackExchange.Redis;
+using Serilog;
 
 namespace Catalog.API.Features.Products;
 
@@ -12,15 +12,20 @@ namespace Catalog.API.Features.Products;
 public class ProductController : ControllerBase
 {
     private readonly IProductRepostiory _repository;
-    public ProductController(IConfiguration config, IConnectionMultiplexer connectionMultiplexer)
+    private readonly ILogger<ProductController> _logger;
+    public ProductController(IConfiguration config, IConnectionMultiplexer connectionMultiplexer, ILogger<ProductController> logger)
     {
-        Console.WriteLine("ProductController created");
         _repository = new ProductRepositoryDapper(config, connectionMultiplexer);
+        _logger = logger;
+        _logger.LogInformation("ProductController created");
     }
 
     [HttpGet("")]
     public IEnumerable<Product> GetProducts()
+    //public int GetProducts()
     {
+        _logger.LogInformation("ProductController created");
+        //return 1;
         return _repository.GetProducts();
     }
 
