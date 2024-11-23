@@ -2,7 +2,7 @@ using Catalog.API.Models;
 
 namespace Catalog.API.Data;
 
-public interface IProductRepostiory
+public interface IProductRepository
 {
     IEnumerable<Product> GetProducts();
     Product FindProduct(int productId);

@@ -1,5 +1,6 @@
 using StackExchange.Redis;
 using Serilog;
+using Catalog.API.Data;
 internal class Program
 {
     private static void Main(string[] args)
@@ -13,8 +14,15 @@ internal class Program
         });
 
         builder.Services.AddControllers();
-        
-        /// Add services to the container.
+
+        builder.Services.AddScoped<DapperDbContext>(sp => 
+        {
+            var dbConnectionSttring = builder.Configuration.GetConnectionString("PlaygroundDB");
+            return new DapperDbContext(dbConnectionSttring);
+        });
+
+        builder.Services.AddScoped<IProductRepository, ProductRepositoryDapper>();
+
         builder.Services.AddSingleton<IConnectionMultiplexer>(sp => 
         {
             var redisConnectionString = builder.Configuration.GetConnectionString("Redis");

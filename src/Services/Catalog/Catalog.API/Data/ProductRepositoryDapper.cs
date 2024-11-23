@@ -1,3 +1,4 @@
+using System.Data;
 using System.Text.Json;
 using Catalog.API.Models;
 using Dapper;
@@ -6,21 +7,17 @@ using StackExchange.Redis;
 
 namespace Catalog.API.Data;
 
-public class ProductRepositoryDapper : IProductRepostiory
+public class ProductRepositoryDapper : IProductRepository
 {
-    private readonly IConfiguration _config;
-    private readonly NpgsqlConnection _connection;
+    private readonly DapperDbContext _dbContext;
     private readonly IConnectionMultiplexer _connectionMultiplexer;
-    private readonly ILogger<ProductRepositoryDapper> _logger;
+    private IDbConnection _dbConnection;
 
-    public ProductRepositoryDapper(IConfiguration config, IConnectionMultiplexer connectionMultiplexer, ILogger<ProductRepositoryDapper> logger)
+    public ProductRepositoryDapper(DapperDbContext dbContext, IConnectionMultiplexer connectionMultiplexer)
     {
-        _config = config;
+        _dbContext = dbContext;
+        _dbConnection = _dbContext.GetConnection();
         _connectionMultiplexer = connectionMultiplexer;
-        _connection = new NpgsqlConnection(_config.GetConnectionString("PlaygroundDB"));
-        _logger = logger;
-
-        _logger.LogInformation("ProductRepositoryDapper created");
     }
 
     public IEnumerable<Product> GetProducts()
@@ -35,7 +32,7 @@ public class ProductRepositoryDapper : IProductRepostiory
             FROM
                 products.Product";
 
-        return _connection.Query<Product>(sql);
+        return _dbConnection.Query<Product>(sql);
     }
 
     public Product FindProduct(int productId)
@@ -58,14 +55,14 @@ public class ProductRepositoryDapper : IProductRepostiory
         };
         var parameters = new DynamicParameters(paramDictionary);
 
-        return _connection.QuerySingle<Product>(sql, parameters);
+        return _dbConnection.QuerySingle<Product>(sql, parameters);
     }
 
     public IEnumerable<Product> GetProductsByCategory(string category)
     {
         string cacheKey = category;
-        var db = _connectionMultiplexer.GetDatabase();
-        var cachedCategoryRedisValue = db.StringGet(cacheKey);
+        var redis = _connectionMultiplexer.GetDatabase();
+        var cachedCategoryRedisValue = redis.StringGet(cacheKey);
 
         if (cachedCategoryRedisValue.HasValue)
         {
@@ -91,10 +88,10 @@ public class ProductRepositoryDapper : IProductRepostiory
         };
         var parameters = new DynamicParameters(paramDictionary);
 
-        var products = _connection.Query<Product>(sql, parameters);
+        var products = _dbConnection.Query<Product>(sql, parameters);
 
         var serializedProducts = JsonSerializer.Serialize(products);
-        db.StringSet(cacheKey, serializedProducts);
+        redis.StringSet(cacheKey, serializedProducts);
         return products;
     }
 
@@ -122,7 +119,7 @@ public class ProductRepositoryDapper : IProductRepostiory
         };
         var parameters = new DynamicParameters(paramDictionary);
 
-        return _connection.Execute(sql, parameters) > 0;
+        return _dbConnection.Execute(sql, parameters) > 0;
     }
 
     public bool UpdateProduct(Product product)
@@ -147,7 +144,7 @@ public class ProductRepositoryDapper : IProductRepostiory
         };
         var parameters = new DynamicParameters(paramDictionary);
 
-        return _connection.Execute(sql, parameters) > 0;
+        return _dbConnection.Execute(sql, parameters) > 0;
     }
 
     public bool DeleteProduct(int productId)
@@ -164,6 +161,6 @@ public class ProductRepositoryDapper : IProductRepostiory
         };
         var parameters = new DynamicParameters(paramDictionary);
 
-        return _connection.Execute(sql, parameters) > 0;
+        return _dbConnection.Execute(sql, parameters) > 0;
     }
 }

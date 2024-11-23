@@ -11,21 +11,15 @@ namespace Catalog.API.Features.Products;
 [Route("api/[controller]")]
 public class ProductController : ControllerBase
 {
-    private readonly IProductRepostiory _repository;
-    private readonly ILogger<ProductController> _logger;
-    public ProductController(IConfiguration config, IConnectionMultiplexer connectionMultiplexer, ILogger<ProductController> logger)
+    private readonly IProductRepository _repository;
+    public ProductController(IProductRepository repository)
     {
-        _repository = new ProductRepositoryDapper(config, connectionMultiplexer);
-        _logger = logger;
-        _logger.LogInformation("ProductController created");
+        _repository = repository;
     }
 
     [HttpGet("")]
     public IEnumerable<Product> GetProducts()
-    //public int GetProducts()
     {
-        _logger.LogInformation("ProductController created");
-        //return 1;
         return _repository.GetProducts();
     }
 
